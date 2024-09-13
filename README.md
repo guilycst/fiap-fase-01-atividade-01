@@ -44,12 +44,23 @@ Usando **R** (e não **Python**), conecte-se a uma **API meteorológica pública
 
 Compacte todos os arquivos em um único **arquivo ZIP**: **Python**, **R**, o **resumo do artigo** e o **link do vídeo no YouTube**. Além disso, grave um vídeo simples, de até 5 minutos, usando seu celular ou um gravador de tela simples (por exemplo, **streamyard.com**), mostrando a tela do seu computador para comprovar o funcionamento completo da sua aplicação em Python e R. Poste o vídeo no **YouTube** como “não listado” e adicione o link a um arquivo TXT dentro do pacote ZIP.
 
+## Estrutura do projeto
+
+```
+/my_program
+│
+├── main.py              # Controla o fluxo e a interface usando PyTerm GUI
+├── services.py          # Lógica de negócios (cálculos e validações)
+├── persistence.py       # Persistência no banco de dados SQLite
+├── crops.json           # Dados estáticos de exemplo
+├── /assets              # Documentação sobre insumos agrícolas (.pdf)
+```
+
 ## Referencias
 
 https://www.agro.bayer.com.br/produtos-protecao-cultivos?p=1
 
-https://cs-assets.bayer.com/is/content/bayer/ALIETTE_BULA_05-SEPT-2024pdf
-
-https://cs-assets.bayer.com/is/content/bayer/ATTILA_BULA_05-SEPT-2024pdf
-
 http://www.iea.agricultura.sp.gov.br/out/TerTexto.php?codTexto=16198#:~:text=O%20levantamento%20final%20da%20safra,rela%C3%A7%C3%A3o%20%C3%A0%20safra%202021%2F22.
+
+
+
