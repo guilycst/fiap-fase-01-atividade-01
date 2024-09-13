@@ -1,3 +1,12 @@
-{
-    
-}
+[
+    {
+        "name": "Café",
+        "planting_area": 1000,
+        "harvest_area": 1000
+    },
+    {
+        "name": "Café",
+        "planting_area": 1000,
+        "harvest_area": 1000
+    }
+]

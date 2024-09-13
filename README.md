@@ -43,3 +43,9 @@ Usando **R** (e não **Python**), conecte-se a uma **API meteorológica pública
 ## O Que Precisa Entregar?
 
 Compacte todos os arquivos em um único **arquivo ZIP**: **Python**, **R**, o **resumo do artigo** e o **link do vídeo no YouTube**. Além disso, grave um vídeo simples, de até 5 minutos, usando seu celular ou um gravador de tela simples (por exemplo, **streamyard.com**), mostrando a tela do seu computador para comprovar o funcionamento completo da sua aplicação em Python e R. Poste o vídeo no **YouTube** como “não listado” e adicione o link a um arquivo TXT dentro do pacote ZIP.
+
+## Referencias
+
+https://www.agro.bayer.com.br/produtos-protecao-cultivos?p=1
+
+https://cs-assets.bayer.com/is/content/bayer/ALIETTE_BULA_05-SEPT-2024pdf
