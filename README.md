@@ -49,3 +49,7 @@ Compacte todos os arquivos em um único **arquivo ZIP**: **Python**, **R**, o **
 https://www.agro.bayer.com.br/produtos-protecao-cultivos?p=1
 
 https://cs-assets.bayer.com/is/content/bayer/ALIETTE_BULA_05-SEPT-2024pdf
+
+https://cs-assets.bayer.com/is/content/bayer/ATTILA_BULA_05-SEPT-2024pdf
+
+http://www.iea.agricultura.sp.gov.br/out/TerTexto.php?codTexto=16198#:~:text=O%20levantamento%20final%20da%20safra,rela%C3%A7%C3%A3o%20%C3%A0%20safra%202021%2F22.
