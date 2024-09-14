@@ -1,0 +1,68 @@
+{
+    "shapes": [
+        {
+            "name": "Quadrado",
+            "dimensions": [
+                {
+                    "name": "Lado",
+                    "unit": "m",
+                    "symbol": "side",
+                    "type": "number"
+                }
+            ],
+            "eval": "side * side",
+            "unit": "m²"
+        },
+        {
+            "name": "Retângulo",
+            "dimensions": [
+                {
+                    "name": "Largura",
+                    "unit": "m",
+                    "symbol": "width",
+                    "type": "number"
+                },
+                {
+                    "name": "Comprimento",
+                    "unit": "m",
+                    "symbol": "length",
+                    "type": "number"
+                }
+            ],
+            "eval": "width * length",
+            "unit": "m²"
+        }
+    ],
+    "crops": [
+        {
+            "name": "Soja",
+            "inputs": [
+                {
+                    "name": "ATTILA",
+                    "type": "Fungicida",
+                    "ml_by_hectare": 400
+                },
+                {
+                    "name": "BELT",
+                    "type": "Inseticida",
+                    "ml_by_hectare": 150
+                }
+            ]
+        },
+        {
+            "name": "Milho",
+            "inputs": [
+                {
+                    "name": "BELT",
+                    "type": "Inseticida",
+                    "ml_by_hectare": 150
+                },
+                {
+                    "name": "CONNECT",
+                    "type": "Inseticida",
+                    "ml_by_hectare": 1000
+                }
+            ]
+        }
+    ]
+}

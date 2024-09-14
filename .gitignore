@@ -6,3 +6,4 @@ __pycache__/
 __pycache__/*
 promp.txt
 .vscode
+logs/textual-debug.log

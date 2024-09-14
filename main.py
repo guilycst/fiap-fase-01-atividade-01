@@ -1,132 +1,252 @@
+from logging import log
 from textual.app import App, ComposeResult
-from textual.widgets import Button, Static, Input, Header, Footer, ListView, ListItem
-from textual.containers import Container, Vertical
+from textual.events import Event
+from textual.widgets import Rule, Button, Label, Static, Input, Header, Footer, ListView, ListItem, ContentSwitcher, RadioSet, RadioButton
+from textual.widget import Widget
+from textual.containers import  Vertical, VerticalScroll, Horizontal
 from textual.reactive import reactive
+from textual.screen import Screen
+from textual.events import ScreenSuspend
 import json
 from service import calculate_area, calculate_input_needed
-from persistence import save_data, load_paginated_data
+from persistence import save_data, load_paginated_data, Model
+import re
 
 
+meta = None
+with open("metadata.json", "r") as file:
+    meta = json.load(file)
+
+flow_state = {
+    "crop": {},
+    "shape": ""
+}
+
+model = Model(None, "", "", 0.0, 0.0, 0.0, "", 0.0)
+
+def reset_state():
+    global flow_state
+    flow_state = {
+        "crop": {},
+        "shape": ""
+    }
+    global model
+    model = Model(None, "", "", 0.0, 0.0, 0.0, "", 0.0)
+
+class ShapeList(ListView):
+    
+    def compose(self) -> ComposeResult:
+        for shape in meta["shapes"]:
+            yield ListItem(Label(shape["name"]), name=shape["name"])
+    
+class CropList(ListView):
+    
+    def compose(self) -> ComposeResult:
+        for crop in meta["crops"]:
+            yield ListItem(Label(crop["name"]), name=crop["name"])
+
+class AreaDisplay(Widget):
+    total_area: reactive[float] = reactive(0)
+    management_area: reactive[float] = reactive(0)
+    usable_area: reactive[float] = reactive(0)
+    unit: str = ""
+
+    def __init__(self,shape, **kwargs):
+        self.unit = shape["unit"]
+        super().__init__(**kwargs)
+        
+    def render(self) -> str:
+        
+        return f"""
+Area Total: {self.total_area} {self.unit}
+Area de manejo: {self.management_area} {self.unit}
+Area util: {self.usable_area} {self.unit}
+        """
+
+class InputForm(Screen):
+    
+    crop: dict | None = None
+    selected_input: dict | None = None
+    all_inputs: dict | None = {}
+    def __init__(self, crop):
+        self.crop = crop
+        super().__init__(id=f"input-form-{hash(crop['name'])}")
+        
+    def compose(self) -> ComposeResult:
+        
+        with RadioSet(id="focus_me"):
+            for i in range(len(self.crop["inputs"])):
+                input = self.crop["inputs"][i]
+                type = input["type"]
+                input_amount = model.usable_area * (input["ml_by_hectare"]* 0.0001)
+                input_amount = input_amount/1000
+                name = f"{input["name"]} - {type} - {input_amount} L"
+                self.all_inputs[i] = [input["name"], input_amount]
+                yield RadioButton(name, name=input["name"])
+                
+            yield Rule()
+            yield Horizontal(
+                Button("✓ Salvar", name="ok", variant="success", disabled=True),
+                Label(" "),
+                Button("✕ Cancel", name="cancel", variant="error"))
+    
+    def on_radio_set_changed(self, event: RadioSet.Changed) -> None:
+        model.input = self.all_inputs[event.index][0]
+        model.input_amount = self.all_inputs[event.index][1]
+        for bt in self.query(Button):
+            if bt.name == "ok":
+                bt.disabled = False
+
+    def on_button_pressed(self, event: Button.Pressed) -> None:
+        btn_name = event.button.name
+        if btn_name == "ok":
+            self.app.pop_screen()
+            global model
+            save_data(model)
+            reset_state()
+            self.app.pop_screen() 
+        elif btn_name == "cancel":
+            self.app.pop_screen()  
+        
+class ShapeForm(VerticalScroll):
+    shape: dict | None = None
+    
+    def __init__(self, shape):
+        self.shape = shape
+        super().__init__(id=f"shape-form-{hash(shape['name'])}")
+        
+    def compose(self) -> ComposeResult:
+        dim = self.shape["dimensions"]
+        yield Label(f"Forneça as dimensões da area de plantio")
+        yield Rule()
+        for d in dim:
+            yield Label(f"{d["name"]} ({d["unit"]})")
+            yield Input(placeholder=f"{d["name"]} ({d["unit"]})", name=d["symbol"], type="number")
+        
+        yield Label("")
+        yield Label(f"Forneça as dimensões da area de manejo")
+        yield Rule()
+        yield Label(f"Ruas/Linhas (m)")
+        yield Input(placeholder="Ruas/Linhas (m)", name="_rows")
+        yield Label(f"Largura (m)")
+        yield Input(placeholder="Largura (m)", name="rows_width")
+        yield Label(f"Comprimento (m)")
+        yield Input(placeholder="Comprimento (m)", name="rows_length")
+        yield Rule()
+        yield AreaDisplay(self.shape)
+        yield Rule()
+        yield Horizontal(
+            Button("✓ Ok", name="ok", variant="primary" , disabled=True),
+            Label(" "),
+            Button("✕ Cancel", name="cancel", variant="error"))
+        
+    def on_button_pressed(self, event: Button.Pressed) -> None:
+        btn_name = event.button.name
+        if btn_name == "ok":
+            model.shape = self.shape["name"]
+            self.app.push_screen(InputForm(flow_state["crop"]))
+        elif btn_name == "cancel":
+            self.app.pop_screen()
+    
+    def on_input_changed(self, event: Input.Changed) -> None:
+        script = self.shape["eval"]
+        management_area_script = "rows_length * rows_width * _rows"
+        for el in self.query(Input):
+            value = el.value
+            if not value or re.match(r'-(\d+)?', value):
+                value = '0'
+            script = re.sub(r'\b' + el.name + r'\b', value, script)
+            management_area_script = re.sub(r'\b' + el.name + r'\b', value, management_area_script)
+            
+        display = self.query_one(AreaDisplay)
+        try:
+            total_result = eval(script)
+            display.total_area = total_result
+            model.total_area = display.total_area
+            
+            management_result = eval(management_area_script) 
+            display.management_area = management_result
+            model.management_area = display.management_area
+            
+            display.usable_area = total_result - management_result
+            model.usable_area = display.usable_area
+            for bt in self.query(Button):
+                if bt.name == "ok":
+                    bt.disabled = model.total_area <= 0 or model.usable_area < 0
+        except Exception as e:
+            print(e)
+        
+
+class InsertFlow(Screen):
+    def compose(self) -> ComposeResult:
+        
+        with ContentSwitcher(initial="crop-list") as switcher:  
+            yield VerticalScroll(
+                *[Static("Selecione uma Cultura"),
+                CropList()],
+                id="crop-list")
+           
+            
+            with VerticalScroll(id="shape-list"):
+                yield Static("Forma da area de plantio")
+                yield ShapeList()
+                    
+            for shape in meta["shapes"]:
+                yield ShapeForm(shape)
+    
+    def on_list_view_selected(self, event: ListView.Selected) -> None:
+        if not flow_state["crop"]:
+            selected_crop = next(crop for crop in meta["crops"] if crop["name"] == event.item.name)
+            flow_state["crop"] = selected_crop
+            model.crop = selected_crop["name"]
+            self.query_one(ContentSwitcher).current = "shape-list"
+        elif not flow_state["shape"]:
+            shape = next(shape for shape in meta["shapes"] if shape["name"] == event.item.name)
+            flow_state["shape"] = shape
+            model.shape = shape["name"]
+            self.query_one(ContentSwitcher).current = f"shape-form-{hash(shape["name"])}"
+    
+    def on_screen_suspend(self, event: ScreenSuspend) -> None:
+        reset_state()
+
+
+class MainMenu(Screen):
+    
+    def compose(self) -> ComposeResult:
+
+        yield Vertical(
+            Static("[bold]Menu Principal", classes="menu-header"),
+            ListView(* [
+                ListItem(Label("+ Inserir Novos Dados de Plantio"), id="insert"),
+                ListItem(Label("⌖ Consultar"), id="view"),
+            ]),
+            Button("↵ Sair", id="exit", variant="error")
+        )
+        
+    def on_list_view_selected(self, event: ListView.Selected) -> None:
+        if event.item.id == "insert":
+            self.app.push_screen(InsertFlow())
+        elif event.item.name == "view":
+              self.mount(Static("view"))
+        
+    def on_button_pressed(self, event: Button.Pressed) -> None:
+        button_id = event.button.id
+        if button_id == "insert":
+            self.app.push_screen(InsertFlow())
+        elif button_id == "view":
+            self.mount(Static("view"))
+        elif button_id == "exit":
+            self.app.exit()
+    
 class CropSelectionApp(App):
-    selected_crop = reactive(None)
-    selected_shape = reactive(None)
-    selected_product = reactive(None)
+    CSS_PATH = "style.css"
+    BINDINGS = [("escape", "app.pop_screen", "Pop screen")]
     
     def compose(self) -> ComposeResult:
         yield Header()
+        yield MainMenu()
         yield Footer()
-        yield Vertical(
-            Static("[bold]Menu Principal", classes="menu-header"),
-            Button("Inserir Novos Dados de Plantio", id="insert", variant="primary"),
-            Button("Visualizar Dados Armazenados", id="view", variant="primary"),
-            Button("Sair", id="exit", variant="error")
-        )
-    
-    async def on_button_pressed(self, event: Button.Pressed) -> None:
-        button_id = event.button.id
-        if button_id == "insert":
-            await self.insert_data_flow()
-        elif button_id == "view":
-            await self.view_data()
-        elif button_id == "exit":
-            self.exit()
 
-    async def insert_data_flow(self):
-        # Seleção da Cultura
-        await self.select_crop()
-
-        # Seleção da Forma Geométrica
-        await self.select_shape()
-
-        # Inserção das Dimensões
-        await self.input_dimensions()
-
-        # Seleção do Insumo
-        await self.select_product()
-
-        # Calculo de insumos e salvamento
-        await self.calculate_and_save_data()
-
-    async def select_crop(self):
-        self.clear()
-        with open("crops.json", "r") as file:
-            crops = json.load(file)
-
-        yield Static("Selecione uma Cultura")
-        crop_list = ListView(*[ListItem(crop["name"]) for crop in crops])
-        self.mount(crop_list)
-
-        crop_list.action_select_cursor = self.handle_crop_selection
-        
-
-    def handle_crop_selection(self):
-        with open("crops.json", "r") as file:
-            crops = json.load(file)
-        event = self.Selected
-        selected_name = event.item.label
-        self.selected_crop = next(crop for crop in crops if crop["name"] == selected_name)
-        self.clear()
-
-    async def select_shape(self):
-        if not self.selected_crop:
-            return
-        self.clear()
-        yield Static("Selecione a Forma Geométrica")
-        shapes = self.selected_crop["shapes"]
-        shape_list = ListView(*[ListItem(shape) for shape in shapes])
-        self.mount(shape_list)
-        shape_list.on_click = self.handle_shape_selection
-
-    def handle_shape_selection(self, event: ListItem):
-        self.selected_shape = event.item.label
-        self.clear()
-
-    async def input_dimensions(self):
-        if not self.selected_shape:
-            return
-        self.clear()
-        yield Static("Insira as Dimensões")
-        self.length_input = Input(placeholder="Comprimento (em metros)")
-        self.mount(self.length_input)
-        if self.selected_shape == "Retângulo":
-            self.width_input = Input(placeholder="Largura (em metros)")
-            self.mount(self.width_input)
-        self.rows_input = Input(placeholder="Número de Ruas")
-        self.mount(self.rows_input)
-
-    async def select_product(self):
-        if not self.selected_crop:
-            return
-        self.clear()
-        yield Static("Selecione um Insumo")
-        products = self.selected_crop["products"]
-        product_list = ListView(*[ListItem(product["name"]) for product in products])
-        self.mount(product_list)
-        product_list.on_click = self.handle_product_selection
-
-    def handle_product_selection(self, event: ListItem):
-        products = self.selected_crop["products"]
-        self.selected_product = next(product for product in products if product["name"] == event.item.label)
-        self.clear()
-
-    async def calculate_and_save_data(self):
-        length = float(self.length_input.value)
-        width = float(self.width_input.value) if self.selected_shape == "Retângulo" else None
-        rows = int(self.rows_input.value)
-
-        total_area, usable_area = calculate_area(self.selected_shape, {"length": length, "width": width, "rows": rows})
-        input_needed = calculate_input_needed(usable_area, self.selected_product["ml_by_hectare"])
-
-        save_data(self.selected_crop["name"], self.selected_shape, total_area, usable_area, self.selected_product["name"], input_needed)
-        self.clear()
-        yield Static(f"Dados de plantio salvos com sucesso!\nCultura: {self.selected_crop['name']}\nInsumo: {self.selected_product['name']}\nQuantidade: {input_needed} ml")
-
-    async def view_data(self):
-        self.clear()
-        yield Static("[bold]Dados Armazenados")
-        data = load_paginated_data(page_size=10)
-        for record in data:
-            yield Static(f"Cultura: {record[1]}, Forma: {record[2]}, Área Útil: {record[4]} ha, Insumo: {record[5]}, Quantidade: {record[6]} ml")
 
 
 if __name__ == "__main__":

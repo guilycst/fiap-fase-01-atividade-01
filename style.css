@@ -1,0 +1,41 @@
+ListView {
+    width: 50;
+    height: auto;
+    margin: 2 2;
+}
+
+ListView Label {
+    padding: 1 2;
+}
+
+AreaDisplay {
+    background: $panel;
+    border: round $primary;
+    padding: 1;
+    height: auto;
+    max-height: 10;
+}
+
+Label {
+    padding: 1 1 1 1;
+}
+
+Screen {
+    align: center middle;
+    padding: 1;
+}
+
+ContentSwitcher {
+    background: $panel;
+    border: round $primary;
+    width: 90%;
+    height: 1fr;
+}
+
+DataTable {
+    background: $panel;
+}
+
+#management_area_in {
+    border: heavy $primary
+}
