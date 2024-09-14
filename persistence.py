@@ -1,5 +1,6 @@
 import sqlite3
 from dataclasses import dataclass
+from typing import Generator
 
 @dataclass
 class Model:
@@ -74,11 +75,17 @@ def _update_field(id, field, value):
     conn.close()
 
 # Função para carregar dados paginados
-def load_paginated_data(page_size=10, page=1):
+def load_data(page_size=10) -> Generator[Model, None, None]:
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
-    offset = (page - 1) * page_size
+    offset = 0
     cursor.execute("SELECT * FROM planting_data LIMIT ? OFFSET ?", (page_size, offset))
     records = cursor.fetchall()
+    
+    while len(records) > 0:
+        for record in records:
+            yield Model(*record)
+        offset += page_size
+        cursor.execute("SELECT * FROM planting_data LIMIT ? OFFSET ?", (page_size, offset))
+        records = cursor.fetchall()
     conn.close()
-    return records

@@ -1,17 +1,16 @@
-from logging import log
+import numbers
+import json
+import re
 from textual.app import App, ComposeResult
-from textual.events import Event
-from textual.widgets import Rule, Button, Label, Static, Input, Header, Footer, ListView, ListItem, ContentSwitcher, RadioSet, RadioButton
+from textual.widgets import DataTable, Rule, Button, Label, Static, Input, Header, Footer, ListView, ListItem, ContentSwitcher, RadioSet, RadioButton
 from textual.widget import Widget
 from textual.containers import  Vertical, VerticalScroll, Horizontal
 from textual.reactive import reactive
 from textual.screen import Screen
 from textual.events import ScreenSuspend
-import json
-from service import calculate_area, calculate_input_needed
-from persistence import save_data, load_paginated_data, Model
-import re
-
+from textual import events
+from persistence import save_data, load_data, Model
+from rich.text import Text
 
 meta = None
 with open("metadata.json", "r") as file:
@@ -208,8 +207,51 @@ class InsertFlow(Screen):
     
     def on_screen_suspend(self, event: ScreenSuspend) -> None:
         reset_state()
+class ViewFlow(Screen):
+    
+    def compose(self) -> ComposeResult:
+        yield DataTable()
+        
+    def on_mount(self) -> None:
+        table = self.query_one(DataTable)
+        table.add_columns("ID", "Cultura", "Forma", "Area Total (m²)", "Area de Manejo (m²)", "Area Util (m²)", "Insumo", "Quantidade (L/m²)")
+        for d in load_data():
+            
+            row = [d.id, d.crop, d.shape, d.total_area, d.management_area, d.usable_area, d.input, d.input_amount]
 
+            for i in range(len(row)):
+                col = row[i]
+                
+                if isinstance(col, numbers.Integral):
+                    continue
+                if isinstance(col, numbers.Real):
+                    row[i] = Text(f"{col:.2f}", justify="right")
+            
+            table.add_row(*row)
+            
+    def on_key(self, event: events.Key)-> None:
+        if not event.key == "enter":
+            return
+        
+        table = self.query_one(DataTable)
+        row = table.get_row_at(table.cursor_row)
+        
+        table.cursor_row
+        table.add_columns("ID", "Cultura", "Forma", "Area Total (m²)", "Area de Manejo (m²)", "Area Util (m²)", "Insumo", "Quantidade (L/m²)")
+        for d in load_data():
+            row = [d.id, d.crop, d.shape, d.total_area, d.management_area, d.usable_area, d.input, d.input_amount]
 
+            for i in range(len(row)):
+                col = row[i]
+                
+                if isinstance(col, numbers.Integral):
+                    continue
+                if isinstance(col, numbers.Real):
+                    row[i] = Text(f"{col:.2f}", justify="right")
+            
+            table.add_row(*row)
+        
+        
 class MainMenu(Screen):
     
     def compose(self) -> ComposeResult:
@@ -226,8 +268,8 @@ class MainMenu(Screen):
     def on_list_view_selected(self, event: ListView.Selected) -> None:
         if event.item.id == "insert":
             self.app.push_screen(InsertFlow())
-        elif event.item.name == "view":
-              self.mount(Static("view"))
+        elif event.item.id == "view":
+            self.app.push_screen(ViewFlow())
         
     def on_button_pressed(self, event: Button.Pressed) -> None:
         button_id = event.button.id
