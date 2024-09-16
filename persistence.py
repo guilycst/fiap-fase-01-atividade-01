@@ -82,6 +82,8 @@ def get_data(id) -> Model:
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM planting_data WHERE id = ?", (id,))
     record = cursor.fetchone()
+    if not record:
+        return None
     conn.close()
     return Model(*record)
 

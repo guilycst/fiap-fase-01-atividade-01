@@ -240,7 +240,7 @@ class ViewFlow(Screen):
     def on_mount(self) -> None:
         table = self.query_one(DataTable)
         table.clear(columns=True)
-        table.add_columns("ID", "Cultura", "Forma", "Area Total (m²)", "Area de Manejo (m²)", "Area Util (m²)", "Insumo", "Quantidade (L/m²)")
+        table.add_columns("ID", "Cultura", "Forma", "Area Total (m²)", "Area de Manejo (m²)", "Area Util (m²)", "Insumo", "Quantidade (L)")
         for d in load_data():
             
             row = [d.id, d.crop, d.shape, d.total_area, d.management_area, d.usable_area, d.input, d.input_amount]
