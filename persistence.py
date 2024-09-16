@@ -60,6 +60,7 @@ def save_data(model: Model):
         """, (model.crop, model.shape, model.total_area, model.management_area, model.usable_area, model.input, model.input_amount))
     conn.commit()
     conn.close()
+    return get_data(cursor.lastrowid)
     
 def delete_data(id):
     conn = sqlite3.connect(DB_NAME)

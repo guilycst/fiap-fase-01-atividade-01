@@ -50,11 +50,44 @@ Compacte todos os arquivos em um único **arquivo ZIP**: **Python**, **R**, o **
 /my_program
 │
 ├── main.py              # Controla o fluxo e a interface usando PyTerm GUI
-├── services.py          # Lógica de negócios (cálculos e validações)
 ├── persistence.py       # Persistência no banco de dados SQLite
-├── crops.json           # Dados estáticos de exemplo
+├── metadata.json        # Define culturas, formatos e insumos a serem renderizados pelo app
+├── style.css            # CSS especifico da biblioteca Textual que gera a TUI
+├── fiap-agro.db         # Banco de dados SQLite para manter os dados gerados para analise (R)
 ├── /assets              # Documentação sobre insumos agrícolas (.pdf)
 ```
+
+## Como Interagir com o Aplicativo Usando o Teclado
+
+Este aplicativo permite a interação por meio do teclado para facilitar a navegação e operação. A seguir, estão as principais combinações de teclas que você pode utilizar:
+
+### Menu Principal
+- **Setas**: Navegar pelas opções do menu.
+- **Enter**: Selecionar a opção destacada.
+- **Escape**: Sair do aplicativo.
+
+### Inserção de Novos Dados
+- **Enter**: Selecionar uma cultura ou forma geométrica durante o processo de inserção de dados.
+- **Tab**: Navegar pelos campos de inserção de dados.
+- **Shift + Tab**: Navegar pelos campos de inserção de dados na ordem inversa.
+- **Enter**: Confirmar e prosseguir para o próximo passo.
+- **Escape**: Cancelar o processo de inserção de dados e voltar ao menu anterior.
+
+### Consulta de Dados
+- **Setas**: Navegar pelos registros exibidos na tabela de consulta.
+- **Enter** ou **e**: Editar o registro selecionado.
+- **d**, **delete** ou **backspace**: Deletar o registro selecionado.
+- **Escape**: Voltar ao menu anterior.
+
+### Edição de Dados
+- **Tab**: Navegar pelos campos de edição.
+- **Shift + Tab**: Navegar pelos campos de edição na ordem inversa.
+- **Enter**: Confirmar a atualização dos dados.
+- **Escape**: Cancelar a edição e voltar à tabela de consulta.
+
+### Ajuda e Comandos Gerais
+- **Escape**: Voltar ou sair da tela atual.
+- **Enter**: Confirmar a ação selecionada.
 
 ## Referencias
 

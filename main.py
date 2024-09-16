@@ -101,7 +101,8 @@ class InputForm(Screen):
         btn_name = event.button.name
         if btn_name == "ok":
             global model
-            save_data(model)
+            new = save_data(model)
+            self.app.notify(f"Registro {new.id} salvo com sucesso")
             reset_state()
             while len(self.app.screen_stack) > 1:
                 self.app.pop_screen()
