@@ -7,9 +7,9 @@ from textual.widget import Widget
 from textual.containers import  Vertical, VerticalScroll, Horizontal
 from textual.reactive import reactive
 from textual.screen import Screen
-from textual.events import ScreenSuspend
+from textual.events import ScreenSuspend, Blur
 from textual import events
-from persistence import save_data, load_data, Model
+from persistence import delete_data, get_data, save_data, load_data, Model
 from rich.text import Text
 
 meta = None
@@ -87,7 +87,8 @@ class InputForm(Screen):
             yield Horizontal(
                 Button("✓ Salvar", name="ok", variant="success", disabled=True),
                 Label(" "),
-                Button("✕ Cancel", name="cancel", variant="error"))
+                Button("✕ Cancelar", name="cancel", variant="error"),
+                classes="dock-btm-mh")
     
     def on_radio_set_changed(self, event: RadioSet.Changed) -> None:
         model.input = self.all_inputs[event.index][0]
@@ -99,22 +100,22 @@ class InputForm(Screen):
     def on_button_pressed(self, event: Button.Pressed) -> None:
         btn_name = event.button.name
         if btn_name == "ok":
-            self.app.pop_screen()
             global model
             save_data(model)
             reset_state()
-            self.app.pop_screen() 
+            while len(self.app.screen_stack) > 1:
+                self.app.pop_screen()
         elif btn_name == "cancel":
             self.app.pop_screen()  
         
-class ShapeForm(VerticalScroll):
+class ShapeForm(Widget):
     shape: dict | None = None
     
     def __init__(self, shape):
         self.shape = shape
         super().__init__(id=f"shape-form-{hash(shape['name'])}")
         
-    def compose(self) -> ComposeResult:
+    def gen_form(self):
         dim = self.shape["dimensions"]
         yield Label(f"Forneça as dimensões da area de plantio")
         yield Rule()
@@ -132,17 +133,30 @@ class ShapeForm(VerticalScroll):
         yield Label(f"Comprimento (m)")
         yield Input(placeholder="Comprimento (m)", name="rows_length")
         yield Rule()
-        yield AreaDisplay(self.shape)
-        yield Rule()
+
+        
+    def compose(self) -> ComposeResult:
+        els: list[Widget] = []
+        for el in self.gen_form():
+            els.append(el)
+            
+        yield VerticalScroll(*els, classes="test")
+        yield AreaDisplay(self.shape, classes="area-display")
         yield Horizontal(
             Button("✓ Ok", name="ok", variant="primary" , disabled=True),
             Label(" "),
-            Button("✕ Cancel", name="cancel", variant="error"))
+            Button("✕ Cancelar", name="cancel", variant="error"),
+            classes="dock-btm-mh"
+            )
         
     def on_button_pressed(self, event: Button.Pressed) -> None:
         btn_name = event.button.name
         if btn_name == "ok":
             model.shape = self.shape["name"]
+            area_display = self.query_one(AreaDisplay)
+            model.total_area = area_display.total_area
+            model.management_area = area_display.management_area
+            model.usable_area = area_display.usable_area
             self.app.push_screen(InputForm(flow_state["crop"]))
         elif btn_name == "cancel":
             self.app.pop_screen()
@@ -178,7 +192,7 @@ class ShapeForm(VerticalScroll):
 
 class InsertFlow(Screen):
     def compose(self) -> ComposeResult:
-        
+        reset_state()
         with ContentSwitcher(initial="crop-list") as switcher:  
             yield VerticalScroll(
                 *[Static("Selecione uma Cultura"),
@@ -205,15 +219,26 @@ class InsertFlow(Screen):
             model.shape = shape["name"]
             self.query_one(ContentSwitcher).current = f"shape-form-{hash(shape["name"])}"
     
-    def on_screen_suspend(self, event: ScreenSuspend) -> None:
-        reset_state()
+        
 class ViewFlow(Screen):
+    
+    BINDINGS = [
+        ("escape", "app.pop_screen", "Voltar/Sair"),
+        ("e", "", "Editar"),
+        ("enter", "", "Editar"),
+        ("d", "", "Deletar"),
+        ("delete", "", "Deletar"),
+        ("backspace", "", "Deletar")
+        ]
+    HELP = "Pressione 'e' ou 'enter' para editar, 'd' ou 'delete' para deletar"
     
     def compose(self) -> ComposeResult:
         yield DataTable()
+        yield Footer()
         
     def on_mount(self) -> None:
         table = self.query_one(DataTable)
+        table.clear(columns=True)
         table.add_columns("ID", "Cultura", "Forma", "Area Total (m²)", "Area de Manejo (m²)", "Area Util (m²)", "Insumo", "Quantidade (L/m²)")
         for d in load_data():
             
@@ -230,27 +255,98 @@ class ViewFlow(Screen):
             table.add_row(*row)
             
     def on_key(self, event: events.Key)-> None:
-        if not event.key == "enter":
-            return
-        
-        table = self.query_one(DataTable)
-        row = table.get_row_at(table.cursor_row)
-        
-        table.cursor_row
-        table.add_columns("ID", "Cultura", "Forma", "Area Total (m²)", "Area de Manejo (m²)", "Area Util (m²)", "Insumo", "Quantidade (L/m²)")
-        for d in load_data():
-            row = [d.id, d.crop, d.shape, d.total_area, d.management_area, d.usable_area, d.input, d.input_amount]
+        match event.key:
+            case "e" | "enter":
+                table = self.query_one(DataTable)
+                table_cursor_row = table.cursor_row
+                table_cursor_col = table.cursor_column
+                row = table.get_row_at(table.cursor_row)
 
-            for i in range(len(row)):
-                col = row[i]
-                
-                if isinstance(col, numbers.Integral):
-                    continue
-                if isinstance(col, numbers.Real):
-                    row[i] = Text(f"{col:.2f}", justify="right")
-            
-            table.add_row(*row)
+                if not row:
+                    return
+                update_screen = UpdateScreen(row)
+                def hook():
+                    self.on_mount()
+                    table = self.query_one(DataTable)
+                    table.move_cursor(row=table_cursor_row, column=table_cursor_col)
+                    
+                update_screen.set_hook(hook)
+                self.app.push_screen(update_screen)
+            case "d" | "delete" | "backspace":
+                table = self.query_one(DataTable)
+                table_cursor_row = table.cursor_row
+                row = table.get_row_at(table.cursor_row)
+                if not row:
+                    return
+                delete_id = row[0]
+                delete_data(id=delete_id)  
+                self.notify(f"Registro {delete_id} deletado com sucesso")   
+                self.on_mount()   
+
+class UpdateScreen(Screen):
+    id = None
+    updating_model: Model = None
+    hook: callable = None
+    
+    def __init__(self, row):
+        self.id = row[0]
+        self.updating_model = get_data(self.id)
+        super().__init__(id=f"update-screen-{row[0]}")
+    
+    def compose(self) -> ComposeResult:
+        yield Label("Atualizar Dados")
+        yield Rule()
+        yield Label("Area Total")
+        yield Input(placeholder="Area Total", name="total_area",type="number", value=f"{self.updating_model.total_area}")
+        yield Label("Area de Manejo")
+        yield Input(placeholder="Area de Manejo", name="management_area",type="number", value=f"{self.updating_model.management_area}")
+        yield Rule()
+        yield Horizontal(
+            Button("✓ Ok", name="ok", variant="primary"),
+            Label(" "),
+            Button("✕ Cancelar", name="cancel", variant="error"),
+            classes="dock-btm-mh")
         
+    def on_input_changed(self, event: Input.Changed) -> None:
+        value = event.value
+        if not value or re.match(r'-(\d+)?', value):
+            value = '0'
+        
+        match event.input.name:
+            case "total_area":
+                self.updating_model.total_area = float(value)
+            case "management_area":
+                self.updating_model.management_area = float(value)
+            case _:
+                pass
+        
+    def set_hook(self, hook):
+        self.hook = hook
+        
+    def on_screen_suspend(self, event: ScreenSuspend) -> None:
+        self.hook()
+        
+    def on_button_pressed(self, event: Button.Pressed) -> None:
+        btn_name = event.button.name
+        match btn_name:
+            case "ok":
+                usable_area = self.updating_model.usable_area
+                new_usable_area = self.updating_model.total_area - self.updating_model.management_area
+                input_amount = self.updating_model.input_amount
+                new_input_amount = 0
+                if input_amount == 0:
+                    meta_crop = next(crop for crop in meta["crops"] if crop["name"] == self.updating_model.crop)
+                    input = next(input for input in meta_crop["inputs"] if input["name"] == self.updating_model.input)
+                    new_input_amount = new_usable_area * (input["ml_by_hectare"]* 0.0001)
+                else:
+                    new_input_amount = new_usable_area * (input_amount / usable_area)
+                self.updating_model.usable_area = new_usable_area
+                self.updating_model.input_amount = new_input_amount
+                save_data(self.updating_model)
+                self.app.pop_screen()
+            case "cancel":
+                self.app.pop_screen()
+              
         
 class MainMenu(Screen):
     
@@ -262,8 +358,8 @@ class MainMenu(Screen):
                 ListItem(Label("+ Inserir Novos Dados de Plantio"), id="insert"),
                 ListItem(Label("⌖ Consultar"), id="view"),
             ]),
-            Button("↵ Sair", id="exit", variant="error")
         )
+        yield Button("↵ Sair", id="exit", variant="error", classes="dock-btm")
         
     def on_list_view_selected(self, event: ListView.Selected) -> None:
         if event.item.id == "insert":
@@ -282,7 +378,7 @@ class MainMenu(Screen):
     
 class CropSelectionApp(App):
     CSS_PATH = "style.css"
-    BINDINGS = [("escape", "app.pop_screen", "Pop screen")]
+    BINDINGS = [("escape", "app.pop_screen", "Voltar/Sair")]
     
     def compose(self) -> ComposeResult:
         yield Header()

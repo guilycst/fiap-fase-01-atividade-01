@@ -16,6 +16,24 @@ AreaDisplay {
     max-height: 10;
 }
 
+.dock-btm-mh {
+    max-height: 3;
+    dock: bottom;
+}
+
+.dock-btm {
+    dock: bottom;
+}
+
+.area-display {
+    dock: right;
+    max-width: 30%;
+}
+
+.test {
+    height: 100%;
+}
+
 Label {
     padding: 1 1 1 1;
 }
