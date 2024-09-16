@@ -95,5 +95,7 @@ https://www.agro.bayer.com.br/produtos-protecao-cultivos?p=1
 
 http://www.iea.agricultura.sp.gov.br/out/TerTexto.php?codTexto=16198#:~:text=O%20levantamento%20final%20da%20safra,rela%C3%A7%C3%A3o%20%C3%A0%20safra%202021%2F22.
 
+## Links externos avaliação
 
-
+**App python demo:**
+https://youtu.be/4s-nyn-sgfo
