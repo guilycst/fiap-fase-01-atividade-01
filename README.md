@@ -1,101 +1,101 @@
-# FIAP - Fase 01 - Atividade 01
+Aqui está uma versão otimizada e mais agradável do README.md, com foco nos resultados e funcionalidades entregues no projeto:
 
-## Iniciando os Trabalhos da Startup
+---
 
-### Atenção: Atividade Avaliativa
+# FarmTech Solutions - Aplicativo para Gestão de Agricultura Digital
 
-- Verifique se o arquivo do upload está correto, pois não é possível enviar um outro arquivo após o fechamento da entrega na plataforma ou correção do professor.
-- Não deixe para realizar a entrega da atividade nos últimos minutos do prazo. Você pode ter algum problema e perder a entrega. As entregas são realizadas apenas pela plataforma.
-- Não disponibilize a resposta da sua atividade em grupos de WhatsApp, Discord, Microsoft Teams, pois pode gerar plágio e zerar a atividade para todos.
-- Você tem um período máximo de 15 dias após a publicação da nota para solicitar a revisão da correção.
+## Visão Geral
 
-## Introdução
+Este projeto foi desenvolvido pela equipe **FarmTech Solutions** para atender uma fazenda que investe em **Agricultura Digital**. O objetivo principal foi criar uma aplicação em **Python** e **R** que oferece cálculos relacionados a áreas de plantio, manejo de insumos e análise estatística, além de uma ferramenta para consulta climática.
 
-Você e seu grupo estão na **Startup FarmTech Solutions**, trabalhando na equipe de Dev. Vocês podem usar o **ChatGPT**, **Germini** ou outra Inteligência Artificial (IA) de sua escolha para ajudar com essa tarefa. A **FIAP** não condena o uso de IAs, desde que o aluno tenha o olhar crítico para filtrar erros e acertos das respostas propostas por elas.
+O projeto está organizado em duas partes principais: a aplicação desenvolvida em **Python**, que gerencia os dados relacionados ao plantio e insumos, e a análise dos dados com **R**, gerando estatísticas e gráficos. Além disso, criamos um script em **R** que faz a consulta climática de cidades usando a API do OpenWeather.
 
-A **FarmTech Solutions** fechou um contrato com uma fazenda que investe em inovação e tecnologia para aumentar sua produtividade e pretende migrar para a **Agricultura Digital**. Para atender esse importante cliente, a **FarmTech** desenvolverá uma aplicação em **Python** que deve incluir:
+## Funcionalidades
 
-a. Suporte para 2 tipos de culturas. O grupo deve decidir quais culturas trabalhar, considerando as principais culturas de seu estado.
+### Aplicação em Python
 
-b. Cálculo de área de plantio para cada cultura. O grupo decide qual tipo de figura geométrica calcular como área plantada para cada tipo de cultura.
+1. **Gerenciamento de Dados de Plantio**:
+   - **Inserção de Dados**: Permite adicionar informações sobre culturas, área de plantio e quantidade de insumos utilizados.
+   - **Cálculo Automático de Área e Insumos**: Baseado em diferentes formas geométricas e nas dimensões informadas pelo usuário.
+   - **Persistência em Banco de Dados SQLite**: Todos os dados são armazenados em um banco de dados local para análise posterior.
+   - **Navegação Intuitiva**: Interação simplificada com o menu usando o mouse e/ou teclado para navegar, inserir, editar, consultar e deletar registros.
 
-c. Cálculo do manejo de insumos. O grupo escolhe o tipo de cultura, o produto e a quantidade necessária, como, por exemplo, aplicar fosfato no café e pulverizar 500 mL/metro com o trator. Quantas ruas a lavoura tem? Quantos litros serão necessários?
+2. **Edição e Consulta de Registros**:
+   - **Consulta de Registros**: Exibe os registros armazenados com a possibilidade de navegação por meio do mouse e/ou das setas.
+   - **Edição**: Toque de tecla (**Enter** ou **e**), o usuário pode editar qualquer registro selecionado.
+   - **Deleção**: Remova registros diretamente da tabela de consulta usando as teclas **d**, **delete** ou **backspace**.
 
-d. Os dados devem estar organizados em vetores.
+### Análise Estatística em R
 
-e. A aplicação em **Python** precisa ter um menu de opções para:
-   - Entrada de dados (para realizar os cálculos);
-   - Saída de dados (impressões no terminal);
-   - Atualização de dados em qualquer posição do vetor;
-   - Deleção de dados do vetor;
-   - Opção "sair do programa".
+1. **Cálculos Estatísticos**:
+   - O script `planting_data_stats.R` realiza uma análise detalhada dos dados de plantio e insumos armazenados no banco de dados SQLite.
+   - **Métricas**: O script calcula a média, mediana e desvio padrão para áreas de plantio e quantidade de insumos, oferecendo uma visão clara da eficiência de cada cultura.
 
-f. Usar rotinas de loop e decisão.
+2. **Visualização de Dados**:
+   - Geração de gráficos, como:
+     - **Boxplots**: Exibem a eficiência do uso de insumos por diferentes formas geométricas.
+     - **Histogramas**: Mostram a distribuição de áreas plantadas, ajudando a identificar padrões no uso do espaço.
 
-g. Em seguida, usar esses dados para desenvolver uma aplicação em **R** que calcule dados estatísticos básicos, como média e desvio. O projeto deve ser versionado no **GitHub**, trabalhando em equipe para simular um ambiente colaborativo de desenvolvimento.
+### Consulta Climática em R
 
-h. Na disciplina de **Formação Social**, o grupo deve resumir o artigo disponível no Google Acadêmico ([link aqui](https://www.alice.cnptia.embrapa.br/alice/bitstream/doc/1003485/1/CAP8.pdf)). O resumo deve ter até 1 folha A4, letra Arial 11, espaçamento 1 entre linhas, com margens direita e esquerda de 2 cm.
+1. **Dados Climáticos em Tempo Real**:
+   - O script `consulta_clima_R.R` permite consultar informações meteorológicas de qualquer cidade, fornecendo:
+     - Temperatura
+     - Umidade
+     - Velocidade do vento
+     - Pressão atmosférica
+     - Percentual de nuvens
+     - Coordenadas geográficas
 
-### Ir Além
+2. **Conectividade com a API OpenWeather**:
+   - O usuário precisa apenas inserir o nome da cidade e o script retornará as informações climáticas atuais.
+   - A configuração é simples, exigindo apenas uma chave de API do OpenWeather, que pode ser facilmente configurada como uma variável de ambiente (export OPENWEATHER_API_KEY=...).
 
-Usando **R** (e não **Python**), conecte-se a uma **API meteorológica pública** para coletar dados climáticos, processar e exibir as informações via texto simples no terminal.
-
-## O Que Precisa Entregar?
-
-Compacte todos os arquivos em um único **arquivo ZIP**: **Python**, **R**, o **resumo do artigo** e o **link do vídeo no YouTube**. Além disso, grave um vídeo simples, de até 5 minutos, usando seu celular ou um gravador de tela simples (por exemplo, **streamyard.com**), mostrando a tela do seu computador para comprovar o funcionamento completo da sua aplicação em Python e R. Poste o vídeo no **YouTube** como “não listado” e adicione o link a um arquivo TXT dentro do pacote ZIP.
-
-## Estrutura do projeto
+## Estrutura do Projeto
 
 ```
 /my_program
 │
-├── main.py              # Controla o fluxo e a interface usando PyTerm GUI
-├── persistence.py       # Persistência no banco de dados SQLite
-├── metadata.json        # Define culturas, formatos e insumos a serem renderizados pelo app
-├── style.css            # CSS especifico da biblioteca Textual que gera a TUI
-├── fiap-agro.db         # Banco de dados SQLite para manter os dados gerados para analise (R)
-├── /assets              # Documentação sobre insumos agrícolas (.pdf)
+├── main.py                # Controla o fluxo e a interface usando PyTerm GUI
+├── requirements.txt       # Dependências do app python
+├── persistence.py         # Persistência no banco de dados SQLite
+├── metadata.json          # Define culturas, formatos e insumos a serem renderizados pelo app
+├── fiap-agro.db           # Banco de dados SQLite para manter os dados gerados para análise (R)
+├── planting_data_stats.R  # Script R para calcular estatísticas e gerar gráficos
+├── consulta_clima_R.R     # Script R para consultar dados climáticos da API OpenWeather
+├── style.css              # CSS especifico da biblioteca Textual que gera a TUI
+├── resumo.pdf             # Resumo do artigo acadêmico
+├── video_link.txt         # Link para o vídeo no YouTube (não listado)
+├── /assets                # Documentação sobre insumos agrícolas (.pdf)
 ```
 
-## Como Interagir com o Aplicativo Usando o Teclado
+## Como Usar
 
-Este aplicativo permite a interação por meio do teclado para facilitar a navegação e operação. A seguir, estão as principais combinações de teclas que você pode utilizar:
+### Python
 
-### Menu Principal
-- **Setas**: Navegar pelas opções do menu.
-- **Enter**: Selecionar a opção destacada.
-- **Escape**: Sair do aplicativo.
+1. **Iniciar Aplicação**:
+   - Criar e ativar ambiente virtual python
+   - Instalar as dependências do arquivo requirements.txt
+   - Execute o arquivo `main.py` para acessar o menu principal.
+   - Use o mouse e/ou as setas para navegar e **Enter** para selecionar uma opção.
+   - Insira dados sobre o plantio e insumos conforme solicitado.
 
-### Inserção de Novos Dados
-- **Enter**: Selecionar uma cultura ou forma geométrica durante o processo de inserção de dados.
-- **Tab**: Navegar pelos campos de inserção de dados.
-- **Shift + Tab**: Navegar pelos campos de inserção de dados na ordem inversa.
-- **Enter**: Confirmar e prosseguir para o próximo passo.
-- **Escape**: Cancelar o processo de inserção de dados e voltar ao menu anterior.
+2. **Edição e Consulta**:
+   - Navegue pelos registros salvos com o mouse e/ou as setas e edite-os pressionando **Enter** ou **e**.
+   - Para deletar, utilize as teclas **d**, **delete** ou **backspace**.
 
-### Consulta de Dados
-- **Setas**: Navegar pelos registros exibidos na tabela de consulta.
-- **Enter** ou **e**: Editar o registro selecionado.
-- **d**, **delete** ou **backspace**: Deletar o registro selecionado.
-- **Escape**: Voltar ao menu anterior.
+### R
 
-### Edição de Dados
-- **Tab**: Navegar pelos campos de edição.
-- **Shift + Tab**: Navegar pelos campos de edição na ordem inversa.
-- **Enter**: Confirmar a atualização dos dados.
-- **Escape**: Cancelar a edição e voltar à tabela de consulta.
+1. **Análise Estatística**:
+   - Execute o script `planting_data_stats.R` para calcular estatísticas e visualizar gráficos a partir dos dados inseridos na aplicação Python.
 
-### Ajuda e Comandos Gerais
-- **Escape**: Voltar ou sair da tela atual.
-- **Enter**: Confirmar a ação selecionada.
+2. **Consulta Climática**:
+   - Execute o script `consulta_clima_R.R`, insira o nome da cidade desejada e obtenha os dados climáticos em tempo real.
+   - Certifique-se de que a variável de ambiente `OPENWEATHER_API_KEY` esteja configurada corretamente.
 
-## Referencias
+## Detalhes da Entrega
 
-https://www.agro.bayer.com.br/produtos-protecao-cultivos?p=1
+- **Resumos Acadêmicos**: O artigo acadêmico requerido pela disciplina de **Formação Social** foi resumido e está disponível em **resumo.pdf**.
+- **Demonstração em Vídeo**: Um vídeo demonstrando a execução completa da aplicação foi gravado e está disponível no **YouTube**. O link para o vídeo está incluído no arquivo `video_link.txt`.
 
-http://www.iea.agricultura.sp.gov.br/out/TerTexto.php?codTexto=16198#:~:text=O%20levantamento%20final%20da%20safra,rela%C3%A7%C3%A3o%20%C3%A0%20safra%202021%2F22.
 
-## Links externos avaliação
-
-**App python demo:**
-https://youtu.be/4s-nyn-sgfo
