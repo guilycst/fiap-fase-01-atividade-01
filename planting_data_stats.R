@@ -1,21 +1,16 @@
-# Instalar pacotes necessários
 if (!require(RSQLite)) {
     install.packages("RSQLite", dependencies = TRUE)
     install.packages("ggplot2", dependencies = TRUE)
 }
 
-# Carregar bibliotecas
 library(RSQLite)
 library(ggplot2)
 
-# Conectar ao banco de dados SQLite
 con <- dbConnect(RSQLite::SQLite(), dbname = "fiap-agro.db")
 
-# Ler os dados da tabela
 query <- "SELECT * FROM planting_data"
 data <- dbGetQuery(con, query)
 
-# 3. Comparação de Eficiência de Uso de Insumos (Litros/m²) por Forma Geométrica (Boxplot)
 data$efficiency <- data$input_amount / data$usable_area  # Eficiência = litros por m²
 
 ggplot(data, aes(x = shape, y = efficiency, fill = shape)) +
@@ -25,7 +20,6 @@ ggplot(data, aes(x = shape, y = efficiency, fill = shape)) +
     theme_minimal() +
     scale_fill_brewer(palette = "Pastel2")
 
-# 4. Distribuição de Áreas Usáveis (Histograma)
 ggplot(data, aes(x = usable_area)) +
     geom_histogram(binwidth = 10000, fill = "lightblue", color = "black") +
     labs(title = "Distribuição de Áreas Usáveis", x = "Área Usável (m²)", y = "Frequência") +
