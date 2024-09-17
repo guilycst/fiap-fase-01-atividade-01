@@ -1,7 +1,7 @@
 # Instalar o pacote necessário, caso ainda não tenha
-if(!require(RSQLite)) {
-  install.packages("RSQLite", dependencies = TRUE)
-  install.packages("ggplot2", dependencies = TRUE)
+if (!require(RSQLite)) {
+    install.packages("RSQLite", dependencies = TRUE)
+    install.packages("ggplot2", dependencies = TRUE)
 }
 
 # Carregar as bibliotecas
@@ -12,7 +12,7 @@ library(ggplot2)
 con <- dbConnect(RSQLite::SQLite(), dbname = "fiap-agro.db")
 
 # Ler dados da tabela
-query <- "SELECT total_area, input_amount FROM planting_data"
+query <- "SELECT * FROM planting_data"
 data <- dbGetQuery(con, query)
 
 # Calcular a média e o desvio padrão para os campos total_area e input_amount
@@ -28,8 +28,8 @@ input_amount_median <- median(data$input_amount, na.rm = TRUE)
 
 # Função para calcular a moda
 mode_function <- function(x) {
-  ux <- unique(x)
-  ux[which.max(tabulate(match(x, ux)))]
+    ux <- unique(x)
+    ux[which.max(tabulate(match(x, ux)))]
 }
 
 # Calcular a moda
@@ -68,30 +68,30 @@ cat("Quartis:", input_amount_quantiles, "\n")
 
 # Criar o plot da relação entre área de manejo e área total
 ggplot(data, aes(x = total_area, y = management_area)) +
-  geom_point(color = 'blue') +
-  labs(title = "Relação entre Área de Manejo e Área Total", x = "Total Area", y = "Management Area") +
-  theme_minimal()
+    geom_point(color = "blue") +
+    labs(title = "Relação entre Área de Manejo e Área Total", x = "Total Area", y = "Management Area") +
+    theme_minimal()
 
 # Criar o plot da comparação de formas geométricas em relação à área usável
 ggplot(data, aes(x = shape, y = usable_area)) +
-  geom_boxplot(fill = 'lightblue') +
-  labs(title = "Comparação entre Formas Geométricas de Plantio", x = "Shape", y = "Usable Area") +
-  theme_minimal()
+    geom_boxplot(fill = "lightblue") +
+    labs(title = "Comparação entre Formas Geométricas de Plantio", x = "Shape", y = "Usable Area") +
+    theme_minimal()
 
 # Adicionar uma coluna de eficiência
 data$efficiency <- data$usable_area / data$total_area
 
 # Criar o plot da eficiência de uso da área
 ggplot(data, aes(x = total_area, y = efficiency)) +
-  geom_point(color = 'green') +
-  labs(title = "Eficiência de Uso da Área", x = "Total Area", y = "Efficiency (Usable/Total)") +
-  theme_minimal()
+    geom_point(color = "green") +
+    labs(title = "Eficiência de Uso da Área", x = "Total Area", y = "Efficiency (Usable/Total)") +
+    theme_minimal()
 
 # Criar o plot da relação entre área total e insumos
 ggplot(data, aes(x = total_area, y = input_amount)) +
-  geom_point(color = 'red') +
-  labs(title = "Relação entre Área Total e Insumos", x = "Total Area", y = "Input Amount") +
-  theme_minimal()
+    geom_point(color = "red") +
+    labs(title = "Relação entre Área Total e Insumos", x = "Total Area", y = "Input Amount") +
+    theme_minimal()
 
 # Fechar a conexão com o banco de dados
 dbDisconnect(con)
