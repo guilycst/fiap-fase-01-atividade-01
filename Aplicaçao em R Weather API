@@ -1,0 +1,34 @@
+# Projeto de API Meteorológica em R
+
+Este projeto contém um script em R para consultar dados meteorológicos de uma API pública e exibir as informações no terminal.
+
+## Pré-requisitos
+
+Antes de executar o script, você precisa ter o R e alguns pacotes instalados.
+Além disso, você precisará de uma chave da API para acessar os dados meteorológicos.
+
+### Instalação do R
+
+1. [Baixe e instale o R](https://cran.r-project.org/).
+
+### Instalação dos Pacotes Necessários
+
+O script utiliza os pacotes `httr` e `jsonlite`. Você pode instalar esses pacotes executando o seguinte código no console do R:
+
+install.packages(c("httr", "jsonlite"))
+
+### Obter a Chave API
+
+Acesse OpenWeatherMap e crie uma conta, se ainda não tiver uma.
+Obtenha uma chave da API (API key) através do painel de controle.
+
+### Definindo Chave no ambiente
+
+Para garantir que sua chave da API não esteja visível no código, defina a chave como uma variável de ambiente. 
+Você pode fazer isso no terminal com o comando:
+export OPENWEATHER_API_KEY="sua_chave_da_api"
+
+### Executando o Script
+
+O script solicitará que você insira o nome da cidade. 
+Digite o nome da cidade e pressione Enter para obter as informações meteorológicas.
